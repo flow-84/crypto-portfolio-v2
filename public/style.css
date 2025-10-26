@@ -1,0 +1,276 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;700&display=swap');
+
+:root {
+    --bg-color: #1a1a2e;
+    --container-bg: #16213e;
+    --card-bg: #0f3460;
+    --primary-color: #e94560;
+    --secondary-color: #533483;
+    --text-color: #e0e0e0;
+    --glow-color: #e94560;
+    --border-radius: 12px;
+    --shadow-color: rgba(0, 0, 0, 0.4);
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    margin: 0;
+    padding: 20px;
+    line-height: 1.6;
+    font-size: 16px; /* Base font size */
+}
+
+.container {
+    max-width: 960px;
+    margin: 0 auto;
+    background-color: var(--container-bg);
+    padding: 25px;
+    border-radius: var(--border-radius);
+    box-shadow: 0 8px 16px var(--shadow-color);
+    border: 1px solid var(--secondary-color);
+    position: relative;
+    overflow: hidden;
+}
+
+.container::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle at center, rgba(83, 52, 131, 0.2) 0%, transparent 70%);
+    animation: rotate 20s linear infinite;
+    opacity: 0.3;
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Import a suitable monospaced font for ASCII-like effect */
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+.ascii-title {
+    font-family: 'Press Start 2P', cursive;
+    font-size: 4em;
+    text-align: center;
+    color: #39FF14; /* Even more vibrant green */
+    text-shadow: 0 0 7px #39FF14, 0 0 15px #39FF14, 0 0 25px #39FF14, 0 0 40px #39FF14, 0 0 50px #39FF14, 0 0 60px #39FF14, 0 0 70px #39FF14;
+    letter-spacing: 5px;
+    margin-bottom: 25px;
+}
+
+@media (max-width: 768px) {
+    .ascii-title {
+        font-size: 1.8em;
+    }
+}
+
+@media (max-width: 480px) {
+    .ascii-title {
+        font-size: 1.4em;
+    }
+}
+
+h1, h2 {
+    color: var(--primary-color);
+    text-align: center;
+    margin-bottom: 20px;
+    text-shadow: 0 0 8px var(--glow-color);
+}
+
+.add-coin-section,
+.portfolio-section {
+    margin-bottom: 30px;
+    padding: 20px;
+    background-color: var(--card-bg);
+    border-radius: var(--border-radius);
+    box-shadow: 0 4px 8px var(--shadow-color);
+    border: 1px solid var(--secondary-color);
+    position: relative;
+    z-index: 1;
+}
+
+.add-coin-section {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: center; /* Center items horizontally */
+    align-items: center; /* Center items vertically */
+}
+
+input[type="text"],
+input[type="number"] {
+    flex: 1 1 auto; /* Allow inputs to grow and shrink */
+    width: 100%; /* Take full width within flex item */
+    max-width: 250px; /* Limit max width on larger screens */
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid var(--secondary-color);
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-size: 1em;
+    outline: none;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    box-sizing: border-box; /* Include padding in element's total width and height */
+}
+
+button {
+    padding: 12px 25px;
+    background-color: var(--primary-color);
+    color: var(--bg-color);
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: bold;
+    transition: background-color 0.3s, box-shadow 0.3s;
+    text-shadow: 0 0 4px rgba(0, 0, 0, 0.3);
+}
+
+button:hover {
+    background-color: var(--glow-color);
+    box-shadow: 0 0 12px var(--glow-color);
+}
+
+table {
+    width: 100%;
+    border-collapse: separate; /* Use separate for rounded corners on cells */
+    border-spacing: 0;
+    margin-top: 20px;
+    border-radius: var(--border-radius);
+    overflow: hidden; /* Ensures rounded corners are visible */
+}
+
+th,
+td {
+    border: 1px solid var(--secondary-color);
+    padding: 12px;
+    text-align: left;
+    font-size: 0.95em;
+}
+
+th {
+    background-color: var(--secondary-color);
+    color: var(--text-color);
+    font-weight: bold;
+    text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+}
+
+tr:nth-child(even) {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+tr:hover {
+    background-color: rgba(83, 52, 131, 0.3);
+}
+
+#totalValue {
+    width: 100%;
+    padding: 5px;
+    text-align: center;
+    font-family: 'Roboto Mono', monospace;
+    background-color: var(--card-bg);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--secondary-color);
+    box-sizing: border-box;
+    margin-top: 20px;
+}
+
+#totalValue span.label {
+    font-size: 0.8em;
+    color: var(--text-color);
+}
+
+#totalValue span.amount {
+    font-size: 2em;
+    font-weight: bold;
+    color: var(--primary-color);
+    text-shadow: 0 0 10px var(--glow-color);
+}
+
+.message {
+    margin-top: 15px;
+    padding: 10px;
+    border-radius: 8px;
+    text-align: center;
+    font-weight: bold;
+}
+
+.message.loading {
+    background-color: #ffc107;
+    color: #333;
+}
+
+.message.success {
+    background-color: #28a745;
+    color: #fff;
+}
+
+.message.error {
+    background-color: #dc3545;
+    color: #fff;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    body {
+        font-size: 14px;
+        padding: 10px;
+    }
+
+    .container {
+        padding: 15px;
+    }
+
+    h1 {
+        font-size: 2em;
+    }
+
+    h2 {
+        font-size: 1.5em;
+    }
+
+    .add-coin-section {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    button {
+        width: 100%;
+        margin-right: 0; /* Remove margin-right on stacked elements */
+    }
+
+    #totalValue {
+        font-size: 1.5em;
+    }
+}
+
+@media (max-width: 480px) {
+    body {
+        font-size: 12px;
+    }
+
+    h1 {
+        font-size: 1.8em;
+    }
+
+    h2 {
+        font-size: 1.3em;
+    }
+
+    th,
+    td {
+        padding: 8px 5px;
+    }
+
+    .add-coin-section {
+        gap: 8px;
+    }
+}

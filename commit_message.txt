@@ -1,0 +1,20 @@
+feat: Implement crypto-web-gui enhancements and fixes
+
+This commit includes a series of improvements and bug fixes for the crypto-web-gui:
+
+- **Dependency Management:**
+  - Corrected `crypto-cli` import paths in `server.js` and `cacheManager.js`.
+  - Added missing `axios` import in `server.js`.
+  - Updated `package.json` to use the correct `@sebastienrousseau/crypto-cli` package and a stable `express` version.
+  - Updated `@sebastienrousseau/crypto-cli` to version `0.0.1` after verifying available versions.
+
+- **Portfolio Management:**
+  - Fixed issue where removed coins reappeared by updating `cacheManager` after deletion.
+  - Ensured newly added coins appear immediately by updating the cache and UI directly.
+  - Implemented logic to update existing coin amounts when adding more of the same coin.
+  - Added a background price fetch for newly added coins to update prices quickly.
+
+- **User Interface & Experience:**
+  - Implemented a coin search functionality with suggestions from CoinGecko.
+  - Improved the styling of the "Total Portfolio Value" display with a retro, high-contrast look.
+  - Modified the title to be a high-contrast ASCII retro title.

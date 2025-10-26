@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>crypto by mittra Portfolio</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1 class="ascii-title">CRYPTO by mittra</h1>
+
+        <div class="add-coin-section">
+            <input type="text" id="coinName" placeholder="Coin Name">
+            <div id="searchResults"></div>
+            <input type="hidden" id="selectedCoinId">
+            <input type="number" id="amount" placeholder="Amount">
+            <button id="addCoinBtn">Add Coin</button>
+            <p id="addMessage" class="message"></p>
+        </div>
+
+        <div class="portfolio-section">
+            <h2>Your Portfolio</h2>
+            <table id="portfolioTable">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Amount</th>
+                        <th>Price</th>
+                        <th>Value</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Portfolio items will be loaded here -->
+                </tbody>
+            </table>
+            <p id="totalValue"><span class="label">Total Portfolio Value:</span> <span class="amount">$0.00</span></p>
+            <p id="portfolioMessage" class="message"></p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const coinNameInput = document.getElementById('coinName');
+            const amountInput = document.getElementById('amount');
+            const addCoinBtn = document.getElementById('addCoinBtn');
+            const addMessage = document.getElementById('addMessage');
+            const portfolioTableBody = document.querySelector('#portfolioTable tbody');
+            const totalValueDisplay = document.getElementById('totalValue');
+            const portfolioMessage = document.getElementById('portfolioMessage');
+
+            async function fetchPortfolio() {
+                portfolioMessage.textContent = ''; // Clear any previous messages
+                portfolioMessage.className = 'message';
+                try {
+                    const response = await fetch('/api/portfolio');
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        portfolioTableBody.innerHTML = '';
+                        let totalCachedValue = 0;
+
+                        // Display cached data first
+                        data.portfolio.forEach(item => {
+                            const row = portfolioTableBody.insertRow();
+                            row.id = `coin-${item.name.replace(/\s/g, '').toLowerCase()}`;
+                            row.insertCell().textContent = item.name;
+                            row.insertCell().textContent = item.amount;
+                            
+                            row.insertCell().textContent = item.price;
+                            row.insertCell().textContent = item.value;
+                            if (item.cached) {
+                                totalCachedValue += parseFloat(item.value);
+                            }
+
+                            const actionCell = row.insertCell();
+                            const removeBtn = document.createElement('button');
+                            removeBtn.textContent = 'Remove';
+                            removeBtn.className = 'remove-btn';
+                            removeBtn.addEventListener('click', async () => {
+                                try {
+                                    const deleteResponse = await fetch(`/api/portfolio/remove/${item.coin}`, {
+                                        method: 'DELETE',
+                                    });
+                                    const deleteData = await deleteResponse.json();
+                                    if (deleteResponse.ok) {
+                                        portfolioMessage.textContent = deleteData.message;
+                                        portfolioMessage.className = 'message success';
+                                        row.remove(); // Immediately remove the row
+                                    } else {
+                                        portfolioMessage.textContent = `Error: ${deleteData.error}`;
+                                        portfolioMessage.className = 'message error';
+                                    }
+                                } catch (error) {
+                                    portfolioMessage.textContent = `Error removing coin: ${error.message}`;
+                                    portfolioMessage.className = 'message error';
+                                }
+                            });
+                            actionCell.appendChild(removeBtn);
+                        });
+                        totalValueDisplay.querySelector('.amount').textContent = `$${totalCachedValue.toFixed(2)}`;
+
+                        // Now, update prices one by one
+                        async function updateLivePricesSequentially() {
+                            for (const item of data.portfolio) {
+                                await new Promise(resolve => setTimeout(resolve, 1500)); // Client-side delay
+                                try {
+                                    const livePriceResponse = await fetch(`/api/coin/${item.coin}/price`);
+                                    const livePriceData = await livePriceResponse.json();
+
+                                    if (livePriceResponse.ok && livePriceData.price) {
+                                        const row = document.getElementById(`coin-${item.name.replace(/\s/g, '').toLowerCase()}`);
+                                        if (row) {
+                                            row.cells[2].textContent = livePriceData.price;
+                                            row.cells[3].textContent = livePriceData.value;
+                                        }
+                                    } else {
+                                        console.error(`Error fetching live price for ${item.name}: ${livePriceData.error}`);
+                                    }
+                                } catch (error) {
+                                    console.error(`Error fetching live price for ${item.name}: ${error.message}`);
+                                }
+                            }
+                        }
+                        updateLivePricesSequentially();
+
+                    } else {
+                        console.error(`Error fetching portfolio: ${data.error}`);
+                    }
+                } catch (error) {
+                    console.error(`Error fetching portfolio: ${error.message}`);
+                }
+            }
+
+            const searchResults = document.getElementById('searchResults');
+            const selectedCoinIdInput = document.getElementById('selectedCoinId');
+
+            coinNameInput.addEventListener('input', async () => {
+                const query = coinNameInput.value;
+                if (query.length < 2) {
+                    searchResults.innerHTML = '';
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`/api/search?query=${query}`);
+                    const coins = await response.json();
+
+                    if (response.ok) {
+                        searchResults.innerHTML = '';
+                        coins.forEach(coin => {
+                            const div = document.createElement('div');
+                            div.textContent = `${coin.name} (${coin.symbol})`;
+                            div.addEventListener('click', () => {
+                                coinNameInput.value = coin.name;
+                                selectedCoinIdInput.value = coin.id;
+                                searchResults.innerHTML = '';
+                            });
+                            searchResults.appendChild(div);
+                        });
+                    } else {
+                        console.error(`Error searching for coins: ${coins.error}`);
+                    }
+                } catch (error) {
+                    console.error(`Error searching for coins: ${error.message}`);
+                }
+            });
+
+            addCoinBtn.addEventListener('click', async () => {
+                const coinId = selectedCoinIdInput.value;
+                const amount = parseFloat(amountInput.value);
+
+                addMessage.textContent = ''; // No loading message
+                addMessage.className = 'message';
+
+                try {
+                    const response = await fetch('/api/portfolio/add', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ coinId: coinId, amount }),
+                    });
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        addMessage.textContent = data.message;
+                        addMessage.className = 'message success';
+                        coinNameInput.value = '';
+                        amountInput.value = '';
+                        selectedCoinIdInput.value = '';
+
+                        // Directly update the table
+                        portfolioTableBody.innerHTML = '';
+                        let totalCachedValue = 0;
+                        data.portfolio.forEach(item => {
+                            const row = portfolioTableBody.insertRow();
+                            row.id = `coin-${item.name.replace(/\s/g, '').toLowerCase()}`;
+                            row.insertCell().textContent = item.name;
+                            row.insertCell().textContent = item.amount;
+                            
+                            row.insertCell().textContent = item.lastPrice.usd;
+                            const value = (item.amount * item.lastPrice.usd);
+                            row.insertCell().textContent = isNaN(value) ? 'N/A' : value.toFixed(2);
+                            if (!isNaN(value)) {
+                                totalCachedValue += value;
+                            }
+
+                            const actionCell = row.insertCell();
+                            const removeBtn = document.createElement('button');
+                            removeBtn.textContent = 'Remove';
+                            removeBtn.className = 'remove-btn';
+                            removeBtn.addEventListener('click', async () => {
+                                try {
+                                    const deleteResponse = await fetch(`/api/portfolio/remove/${item.coin}`, {
+                                        method: 'DELETE',
+                                    });
+                                    const deleteData = await deleteResponse.json();
+                                    if (deleteResponse.ok) {
+                                        portfolioMessage.textContent = deleteData.message;
+                                        portfolioMessage.className = 'message success';
+                                        row.remove(); // Immediately remove the row
+                                    } else {
+                                        portfolioMessage.textContent = `Error: ${deleteData.error}`;
+                                        portfolioMessage.className = 'message error';
+                                    }
+                                } catch (error) {
+                                    portfolioMessage.textContent = `Error removing coin: ${error.message}`;
+                                    portfolioMessage.className = 'message error';
+                                }
+                            });
+                            actionCell.appendChild(removeBtn);
+                        });
+                        totalValueDisplay.querySelector('.amount').textContent = `$${totalCachedValue.toFixed(2)}`;
+
+                        // Poll for price update
+                        const pollPrice = setInterval(async () => {
+                            try {
+                                const priceResponse = await fetch(`/api/coin/${coinId}/price`);
+                                const priceData = await priceResponse.json();
+                                if (priceResponse.ok) {
+                                    const row = document.getElementById(`coin-${coinId.replace(/\s/g, '').toLowerCase()}`);
+                                    if (row) {
+                                        row.cells[2].textContent = priceData.price;
+                                        row.cells[3].textContent = priceData.value;
+                                        clearInterval(pollPrice);
+                                    }
+                                }
+                            } catch (error) {
+                                // Price not ready yet, continue polling
+                            }
+                        }, 2000);
+                        addMessage.textContent = `Error: ${data.error}`;
+                        addMessage.className = 'message error';
+                    }
+                } catch (error) {
+                    addMessage.textContent = `Error adding coin: ${error.message}`;
+                    addMessage.className = 'message error';
+                }
+            });
+
+            fetchPortfolio(); // Initial load
+        });
+    </script>
+</body>
+</html>
