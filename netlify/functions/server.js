@@ -4,7 +4,7 @@ const express = require('express');
 const path = require('path');
 const axios = require('axios');
 const { getPortfolio, savePortfolio, searchCoinByName, getCoinDataById } = require('@sebastienrousseau/crypto-cli');
-const { initCacheManager, getCachedPortfolio, updatePortfolioCache, fetchCoinPrice } = require('../../../cacheManager');
+const { initCacheManager, getCachedPortfolio, updatePortfolioCache, fetchCoinPrice } = require('./cacheManager');
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
