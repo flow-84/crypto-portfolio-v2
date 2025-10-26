@@ -3,9 +3,8 @@ require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const axios = require('axios');
-const { getPortfolio, savePortfolio } = require('crypto-cli/src/portfolio');
-const { searchCoinByName, getCoindataById } = require('crypto-cli/src/api');
-const { initCacheManager, getCachedPortfolio, updatePortfolioCache, fetchCoinPrice } = require('./cacheManager');
+const { getPortfolio, savePortfolio, searchCoinByName, getCoinDataById } = require('@sebastienrousseau/crypto-cli');
+const { initCacheManager, getCachedPortfolio, updatePortfolioCache, fetchCoinPrice } = require('../../../cacheManager');
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
